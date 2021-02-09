@@ -47,6 +47,8 @@ type AssertionKey struct {
 // Status is an enumeration of possible outcomes of a test assertion.
 type Status rune
 
+//go:generate go run golang.org/x/tools/cmd/stringer -type=Status assertion.go
+
 const (
 	// Pending indicates that the test was registered (during planning)
 	// but didn't register an outcome during apply, perhaps due to being
@@ -64,3 +66,15 @@ const (
 	// test report failed in some other way.
 	Error Status = 'E'
 )
+
+// SuiteCanPass returns true if a suite containing an assertion with this
+// status could possibly succeed. The suite as a whole succeeds only if all
+// of its assertions have statuses where SuiteCanPass returns true.
+func (s Status) SuiteCanPass() bool {
+	switch s {
+	case Failed, Error:
+		return false
+	default:
+		return true
+	}
+}
